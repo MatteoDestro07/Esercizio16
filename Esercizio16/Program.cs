@@ -17,6 +17,8 @@ namespace Esercizio16
             int Turno = 1;
             bool vinto = false;
             bool perso = false;
+            int R = 19;
+            int oldR = 19;
 
 
             /*
@@ -25,7 +27,8 @@ namespace Esercizio16
              */
 
             // Creazione delle MATRICE di Gioco a 0
-            // ...
+            char[,] M = new char[17, 32];
+            caricaMatrice(M);
 
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
@@ -77,8 +80,10 @@ namespace Esercizio16
                             Punteggio(Turno, pedG, pedR);
 
                             // Controllo Nuova Pedina - Forza 4
-                            // ...
-
+                            ControlloNuovaPedina(posI, ref posOLD, N, Turno, R, ref oldR, M);
+                            posOLD = posI;
+                            oldR = R;
+                            R -= 2;
                             break;
 
                     }
@@ -91,6 +96,45 @@ namespace Esercizio16
             }
             while ((C != 81) && !vinto && !perso); // a Scelta !!!
 
+        }
+
+        static void caricaMatrice(char[,] M)
+        {
+            for (int i = 1; i < 16; i += 2)
+            {
+                for (int j = 2; j < 32; j += 4)
+                {
+                    Console.Write(' ');
+                }
+                    
+            }
+        }
+
+        static void ControlloNuovaPedina(int newPos, ref int oldPos, int nChar, int T, int R, ref int oldR, ref int[,] M)
+        {
+
+            Console.SetCursorPosition(newPos, R);
+
+            if (T == 1)
+                Console.BackgroundColor = ConsoleColor.Yellow;
+            else
+                Console.BackgroundColor = ConsoleColor.Red;
+
+            int row;
+            for (row = 5; row >= 0; row--)
+            {
+                if (board[row, currentColumn] == ' ')
+                {
+                    board[row, currentColumn] = currentPlayer;
+                    break;
+                }
+            }
+
+
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write("#");
+
+            Console.BackgroundColor = ConsoleColor.Black;
         }
 
         static void Struttura()
