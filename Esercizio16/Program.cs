@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,8 @@ namespace Esercizio16
             bool vinto = false;
             bool perso = false;
             int R = 19;
-            int oldR = 19;
+            int Rm = 7;
+            int Cm = 7;
 
 
             /*
@@ -27,7 +29,7 @@ namespace Esercizio16
              */
 
             // Creazione delle MATRICE di Gioco a 0
-            char[,] M = new char[17, 32];
+            int[,] M = new int[8,8];
             caricaMatrice(M);
 
             Console.BackgroundColor = ConsoleColor.Black;
@@ -40,7 +42,7 @@ namespace Esercizio16
             Punteggio(Turno, pedG, pedR);
 
             // Gestione della Pedina
-            Pedina(posI, ref posOLD, N, Turno);
+            Pedina(posI, ref posOLD, N, Turno, ref R, ref M);
 
             do
             {
@@ -80,17 +82,13 @@ namespace Esercizio16
                             Punteggio(Turno, pedG, pedR);
 
                             // Controllo Nuova Pedina - Forza 4
-                            ControlloNuovaPedina(posI, ref posOLD, N, Turno, R, ref oldR, M);
-                            posOLD = posI;
-                            oldR = R;
-                            R -= 2;
+                            // ...
                             break;
 
                     }
 
                     // Gestione della Pedina
-                    Pedina(posI, ref posOLD, N, Turno);
-
+                    Pedina(posI, ref posOLD, N, Turno, ref R, ref M);
                 }
 
             }
@@ -98,43 +96,16 @@ namespace Esercizio16
 
         }
 
-        static void caricaMatrice(char[,] M)
+        static void caricaMatrice(int[,] M)
         {
-            for (int i = 1; i < 16; i += 2)
+            for (int i = 1; i < 8; i++)
             {
-                for (int j = 2; j < 32; j += 4)
+                for (int j = 2; j < 8; j++)
                 {
-                    Console.Write(' ');
+                    M[i, j] = 0;
                 }
                     
             }
-        }
-
-        static void ControlloNuovaPedina(int newPos, ref int oldPos, int nChar, int T, int R, ref int oldR, ref int[,] M)
-        {
-
-            Console.SetCursorPosition(newPos, R);
-
-            if (T == 1)
-                Console.BackgroundColor = ConsoleColor.Yellow;
-            else
-                Console.BackgroundColor = ConsoleColor.Red;
-
-            int row;
-            for (row = 5; row >= 0; row--)
-            {
-                if (board[row, currentColumn] == ' ')
-                {
-                    board[row, currentColumn] = currentPlayer;
-                    break;
-                }
-            }
-
-
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("#");
-
-            Console.BackgroundColor = ConsoleColor.Black;
         }
 
         static void Struttura()
@@ -207,7 +178,7 @@ namespace Esercizio16
 
         }
 
-        static void Pedina(int newPos, ref int oldPos, int nChar, int T)
+        static void Pedina(int newPos, ref int oldPos, int nChar, int T, ref int R, ref int[,] M)
         {
             /*
              * 37 ==> freccia SX;
@@ -215,6 +186,11 @@ namespace Esercizio16
              * 39 ==> freccia DX;
              * 40 ==> freccia DOWN
              */
+            
+            int i = 7;
+            int j = 0;
+            bool trovato = false;
+            R = 19;
 
             // Pulire "Vecchia" Posizione
             Console.SetCursorPosition(oldPos, 1);
@@ -232,6 +208,43 @@ namespace Esercizio16
                 oldPos -= 4;
             else if (nChar == 39 && oldPos < 35)
                 oldPos +=4;
+            else if(nChar == 40)
+            {
+                switch (newPos)
+                {
+                    case 7: j = 0;break;
+                    case 11: j = 1; break;
+                    case 15: j = 2; break;
+                    case 19: j = 3; break;
+                    case 23: j = 4; break;
+                    case 27: j = 5; break;
+                    case 31: j = 6; break;
+                    case 35: j = 7; break;
+                }
+
+                while (M[i,j]!=0)
+                {
+                    R -= 2;
+                    i--;
+                    if (R < 4)
+                    {
+                        if (newPos == 35)
+                            newPos -= 4;
+                        else
+                            newPos += 4;
+                        R = 19;
+                        i = 7;
+                        break;
+                    }
+                }
+
+                Console.SetCursorPosition(newPos, R);
+                Console.Write("#");
+                if (T == 1)
+                    M[i, j] = 1;
+                else
+                    M[i, j] = 2;
+            }
 
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
