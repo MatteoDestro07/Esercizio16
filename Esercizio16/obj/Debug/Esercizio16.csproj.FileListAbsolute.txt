@@ -13,3 +13,11 @@ D:\3°Superiore\Informatica\C#\Laboratorio\Esercizio16\Esercizio16\obj\Debug\Ese
 D:\3°Superiore\Informatica\C#\Laboratorio\Esercizio16\Esercizio16\obj\Debug\Esercizio16.csproj.CoreCompileInputs.cache
 D:\3°Superiore\Informatica\C#\Laboratorio\Esercizio16\Esercizio16\obj\Debug\Esercizio16.exe
 D:\3°Superiore\Informatica\C#\Laboratorio\Esercizio16\Esercizio16\obj\Debug\Esercizio16.pdb
+D:\3°Superiore\Informatica\C#\Laboratorio\Esercizio16\Esercizio16\obj\Debug\Esercizio16.csproj.SuggestedBindingRedirects.cache
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\bin\Debug\Esercizio16.exe.config
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\bin\Debug\Esercizio16.exe
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\bin\Debug\Esercizio16.pdb
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\obj\Debug\Esercizio16.exe
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\obj\Debug\Esercizio16.pdb
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\obj\Debug\Esercizio16.csproj.AssemblyReference.cache
+D:\3°Superiore\Informatica\C#\Laboratorio\Console\Esercizio16\Esercizio16\obj\Debug\Esercizio16.csproj.CoreCompileInputs.cache

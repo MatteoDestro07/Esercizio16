@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.Serialization.Formatters;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,20 +18,23 @@ namespace Esercizio16
             int posI = 7, posOLD = 7;
             int N = 0;
             int Turno = 1;
-            bool vinto = false;
-            bool perso = false;
+            bool vG = false;
+            bool vR = false;
+            bool pareggio = false;
             int R = 19;
-            int Rm = 7;
-            int Cm = 7;
+            int[] V = new int[8];
+            int[,] M = new int[8, 8];
+            int j = 0;
+            int posMax = 35;
+            int posMin = 7;
 
-
+            caricaVett(V);
             /*
              * Turno 1 ==> ROSSO
              * Turno 2 ==> GIALLO
              */
 
             // Creazione delle MATRICE di Gioco a 0
-            int[,] M = new int[8,8];
             caricaMatrice(M);
 
             Console.BackgroundColor = ConsoleColor.Black;
@@ -42,27 +47,38 @@ namespace Esercizio16
             Punteggio(Turno, pedG, pedR);
 
             // Gestione della Pedina
-            Pedina(posI, ref posOLD, N, Turno, ref R, ref M);
+            Pedina(posI, ref posOLD, N, Turno, ref R, ref M, ref V, posMin, posMax);
 
             do
             {
-
                 // Controllo la "pressione" di un Tasto / Carattere
                 if (Console.KeyAvailable)
                 {
                     C = Convert.ToChar(Console.ReadKey(false).Key);
                     N = Convert.ToInt32(C);
 
+                    switch (posI)
+                    {
+                        case 7: j = 0; break;
+                        case 11: j = 1; break;
+                        case 15: j = 2; break;
+                        case 19: j = 3; break;
+                        case 23: j = 4; break;
+                        case 27: j = 5; break;
+                        case 31: j = 6; break;
+                        case 35: j = 7; break;
+                    }
+
                     switch (N)
                     {
                         case 37:
                             // Freccia SX
-                            if (posI > 7)
+                            if (posI > posMin)
                                 posI -= 4;
                             break;
                         case 39:
                             // Freccia DX
-                            if (posI < 35)
+                            if (posI < posMax)
                                 posI += 4;
                             break;
                         case 40:
@@ -78,22 +94,210 @@ namespace Esercizio16
                                 Turno--;
                             }
 
+                            // Controlli se la colonna è piena
+                            while ((M[0, j] == 1 || M[0, j] == 2) && posI == posMax)
+                            {
+                                posOLD = posI;
+                                posI -= 4;
+                                posMax -= 4;
+                                Console.SetCursorPosition(posOLD, 1);
+                                Console.Write("    ");
+                                j--;
+                            }
+
+                            while ((M[0, j] == 1 || M[0, j] == 2) && posI > posMin && posI < posMax)
+                            {
+                                posOLD = posI;
+                                Console.SetCursorPosition(posOLD, 1);
+                                Console.Write("     ");
+                                posI += 4;
+                                j++;
+                            }
+
+                            while((M[0, j] == 1 || M[0, j] == 2) && posI == posMin)
+                            {
+                                posOLD = posI;
+                                Console.SetCursorPosition(posOLD, 1);
+                                Console.Write("     ");
+                                posI += 4;
+                                posMin += 4;
+                                j++;
+                            }
+
                             // Gestione del Punteggio
                             Punteggio(Turno, pedG, pedR);
 
                             // Controllo Nuova Pedina - Forza 4
-                            // ...
+                            ControlloVittoria(M, Turno, ref vG, ref vR, ref pareggio);
                             break;
 
                     }
 
                     // Gestione della Pedina
-                    Pedina(posI, ref posOLD, N, Turno, ref R, ref M);
+                    Pedina(posI, ref posOLD, N, Turno, ref R, ref M, ref V, posMin, posMax);
                 }
 
             }
-            while ((C != 81) && !vinto && !perso); // a Scelta !!!
+            while ((C != 81) && !vG && !vR && !pareggio); // a Scelta !!!
 
+            Console.SetCursorPosition(0, 25);
+            if (vG)
+            {
+                Console.WriteLine("Vittoria del giallo");
+            }
+            else if (vR)
+            {
+                Console.WriteLine("Vittoria del rosso");
+            }
+
+            attesa();
+
+        } // FINE MAIN
+
+        public static int disegnaMenu()
+        {
+            int sc = 0;
+
+            Console.Clear();
+            Console.WriteLine("-----MENU-----");
+            Console.WriteLine("1. Gioca");
+            Console.WriteLine("2. Visualizza Risultati");
+            Console.WriteLine("0. Esci");
+
+            Console.WriteLine("Inserisci la tua scelta ==> ");
+            sc = Convert.ToInt32(Console.ReadLine());
+
+            return sc;
+        }
+
+        public static void caricaVett(int[] v)
+        {
+            for(int i=0; i<v.Length; i++)
+                v[i] = 0;
+        }
+
+        static void ControlloVittoria(int[,] M, int T, ref bool vG, ref bool vR, ref bool pareggio)
+        {
+            int x = 0;
+            if (T == 1)
+                x = 2;
+            else if (T == 2)
+                x = 1;
+
+            // Check horizontal lines
+            for (int i = 0; i < 8; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 5; j++)
+                {
+                    if (M[i, j] == x)
+                    {
+                        count++;
+                        if (count == 4)
+                        {
+                            if (x == 1) 
+                                vR = true;
+                            else
+                                vG = true;
+                        }
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                }
+            }
+
+            // Check vertical lines
+            for (int i = 0; i < 5; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (M[i, j] == x)
+                    {
+                        count++;
+                        if (count == 4)
+                        {
+                            if (x == 1)
+                                vR = true;
+                            else
+                                vG = true;
+                        }
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                }
+            }
+
+            // Check diagonal lines (top-left to bottom-right)
+            for (int i = 0; i < 5; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 8 - i; j++)
+                {
+                    if (M[i + j, j] == x)
+                    {
+                        count++;
+                        if (count == 4)
+                        {
+                            if (x == 1)
+                                vR = true;
+                            else
+                                vG = true;
+                        }
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                }
+            }
+
+            // Check diagonal lines (bottom-left to top-right)
+            for (int i = 0; i < 5; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 8 - i; j++)
+                {
+                    if (M[i + j, 7 - j] == x)
+                    {
+                        count++;
+                        if (count == 4)
+                        {
+                            if (x == 1)
+                                vR = true;
+                            else
+                                vG = true;
+                        }
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                }
+            }
+
+        }
+
+        static void StampaMatrice(int[,] M, int Rm, int Cm)
+        {
+            for (int i = 0; i < Rm; i++) //gestisco le righe
+            {
+                for (int j = 0; j < Cm; j++)
+                    Console.Write(M[i, j]);
+
+                Console.WriteLine();
+            }
+        }
+
+        static void attesa()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Premi un tasto per uscire");
+            Console.ReadKey();
         }
 
         static void caricaMatrice(int[,] M)
@@ -178,7 +382,7 @@ namespace Esercizio16
 
         }
 
-        static void Pedina(int newPos, ref int oldPos, int nChar, int T, ref int R, ref int[,] M)
+        static void Pedina(int newPos, ref int oldPos, int nChar, int T, ref int R, ref int[,] M, ref int[]V, int posMin, int posMax)
         {
             /*
              * 37 ==> freccia SX;
@@ -186,10 +390,9 @@ namespace Esercizio16
              * 39 ==> freccia DX;
              * 40 ==> freccia DOWN
              */
-            
+
             int i = 7;
             int j = 0;
-            bool trovato = false;
             R = 19;
 
             // Pulire "Vecchia" Posizione
@@ -204,9 +407,9 @@ namespace Esercizio16
             Console.ForegroundColor = ConsoleColor.Black;
             Console.Write("#");  // a Scelta !!!
 
-            if (nChar == 37 && oldPos > 7)
+            if (nChar == 37 && oldPos > posMin)
                 oldPos -= 4;
-            else if (nChar == 39 && oldPos < 35)
+            else if (nChar == 39 && oldPos < posMax)
                 oldPos +=4;
             else if(nChar == 40)
             {
@@ -228,27 +431,39 @@ namespace Esercizio16
                     i--;
                     if (R < 4)
                     {
+                        V[j] = 1;
+                        oldPos = newPos;
                         if (newPos == 35)
+                        {
                             newPos -= 4;
+                            j--;
+                        }
                         else
+                        {
                             newPos += 4;
+                            j++;
+                        }
                         R = 19;
                         i = 7;
                         break;
                     }
                 }
 
+                if (T == 1)
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                else
+                    Console.BackgroundColor = ConsoleColor.Red;
                 Console.SetCursorPosition(newPos, R);
                 Console.Write("#");
                 if (T == 1)
-                    M[i, j] = 1;
-                else
                     M[i, j] = 2;
+                else
+                    M[i, j] = 1;
             }
 
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
 
         }
-    }
+    }//FINE CLASSI
 }
