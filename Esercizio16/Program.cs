@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Formatters;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,13 +23,12 @@ namespace Esercizio16
             bool vR = false;
             bool pareggio = false;
             int R = 19;
-            int[] V = new int[8];
             int[,] M = new int[8, 8];
             int j = 0;
             int posMax = 35;
             int posMin = 7;
+            int i = 0;
 
-            caricaVett(V);
             /*
              * Turno 1 ==> ROSSO
              * Turno 2 ==> GIALLO
@@ -47,7 +47,7 @@ namespace Esercizio16
             Punteggio(Turno, pedG, pedR);
 
             // Gestione della Pedina
-            Pedina(posI, ref posOLD, N, Turno, ref R, ref M, ref V, posMin, posMax);
+            Pedina(posI, ref posOLD, N, Turno, ref R, ref M, posMin, posMax, ref i);
 
             do
             {
@@ -94,8 +94,11 @@ namespace Esercizio16
                                 Turno--;
                             }
 
-                            // Controlli se la colonna è piena
-                            while ((M[0, j] == 1 || M[0, j] == 2) && posI == posMax)
+                            if (posI == posMax && (M[0, j] == 1 || M[0, j] == 2))
+                                pareggio = true;
+
+                            // Controllo se la colonna è piena
+                            while ((M[0, j] == 1 || M[0, j] == 2) && posI == posMax && !pareggio)
                             {
                                 posOLD = posI;
                                 posI -= 4;
@@ -105,7 +108,7 @@ namespace Esercizio16
                                 j--;
                             }
 
-                            while ((M[0, j] == 1 || M[0, j] == 2) && posI > posMin && posI < posMax)
+                            while ((M[0, j] == 1 || M[0, j] == 2) && posI > posMin && posI < posMax && !pareggio)
                             {
                                 posOLD = posI;
                                 Console.SetCursorPosition(posOLD, 1);
@@ -114,7 +117,7 @@ namespace Esercizio16
                                 j++;
                             }
 
-                            while((M[0, j] == 1 || M[0, j] == 2) && posI == posMin)
+                            while((M[0, j] == 1 || M[0, j] == 2) && posI == posMin && !pareggio)
                             {
                                 posOLD = posI;
                                 Console.SetCursorPosition(posOLD, 1);
@@ -126,15 +129,18 @@ namespace Esercizio16
 
                             // Gestione del Punteggio
                             Punteggio(Turno, pedG, pedR);
-
-                            // Controllo Nuova Pedina - Forza 4
-                            ControlloVittoria(M, Turno, ref vG, ref vR, ref pareggio, j);
+                                
                             break;
 
                     }
 
                     // Gestione della Pedina
-                    Pedina(posI, ref posOLD, N, Turno, ref R, ref M, ref V, posMin, posMax);
+                    Pedina(posI, ref posOLD, N, Turno, ref R, ref M, posMin, posMax, ref i);
+
+                    // Controllo Nuova Pedina - Forza 4
+                    ControlloColonna(M, Turno, ref vG, ref vR, j, i);
+                    ControlloDP(M, Turno, ref vG, ref vR, j, i);
+                    ControlloRiga(M, Turno, ref vG, ref vR, i);
                 }
 
             }
@@ -142,45 +148,79 @@ namespace Esercizio16
 
             Console.SetCursorPosition(0, 25);
             if (vG)
-            {
                 Console.WriteLine("Vittoria del giallo");
-            }
             else if (vR)
-            {
                 Console.WriteLine("Vittoria del rosso");
-            }
+            else if (pareggio)
+                Console.WriteLine("Pareggio");
 
             attesa();
 
         } // FINE MAIN
 
-        public static int disegnaMenu()
+        public static void ControlloRiga(int[,] M, int T, ref bool vG, ref bool vR, int i)
         {
-            int sc = 0;
+            int cont = 0;
+            int j = 0;
+            int x = M[i, j];
 
-            Console.Clear();
-            Console.WriteLine("-----MENU-----");
-            Console.WriteLine("1. Gioca");
-            Console.WriteLine("2. Visualizza Risultati");
-            Console.WriteLine("0. Esci");
-
-            Console.WriteLine("Inserisci la tua scelta ==> ");
-            sc = Convert.ToInt32(Console.ReadLine());
-
-            return sc;
+            while (j < 8 && cont < 4) 
+            {
+                if (M[i, j] == x && x != 0)
+                    cont++;
+                else
+                {
+                    cont = 1;
+                    x = M[i, j];
+                }
+                j++;
+            }
+            if (cont == 4)
+                if (x == 2)
+                    vG = true;
+                else
+                    vR = true;
         }
 
-        public static void caricaVett(int[] v)
+        public static void ControlloDP(int[,] M, int T, ref bool vG, ref bool vR, int j, int i) 
         {
-            for(int i=0; i<v.Length; i++)
-                v[i] = 0;
+            int x = 0;
+            int cont = 0;
+
+            //decremento i e j fino a quando uno dei due non è uguale a 0
+            while (i > 0 && j > 0)
+            {
+                j--;
+                i--;
+            }
+
+            //ciclo fino a quando i o j vale 8 o non trovo 4 pedine uguali vicine
+            while (i < 8 && j < 8 && cont != 4)
+            {
+                if (M[i,j] == x && M[i,j] != 0)
+                    cont++;
+                else
+                {
+                    cont = 1;
+                }
+
+                //incremento sia i che j per rimanere sulla stessa diagonale
+                i++;
+                j++;
+            }
+
+            if (cont == 4)
+                if (x == 2)
+                    vG = true;
+                else
+                    vR = true;
         }
 
-        static void ControlloVittoria(int[,] M, int T, ref bool vG, ref bool vR, ref bool pareggio, int j)
+        static void ControlloColonna(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
         {
-            int i = 0;
             int cont = 0;
             int x = 0;
+            i = 0;
 
             if (T == 1)
                 x = 2;
@@ -306,7 +346,7 @@ namespace Esercizio16
 
         }
 
-        static void Pedina(int newPos, ref int oldPos, int nChar, int T, ref int R, ref int[,] M, ref int[]V, int posMin, int posMax)
+        static void Pedina(int newPos, ref int oldPos, int nChar, int T, ref int R, ref int[,] M, int posMin, int posMax,ref int i)
         {
             /*
              * 37 ==> freccia SX;
@@ -315,7 +355,7 @@ namespace Esercizio16
              * 40 ==> freccia DOWN
              */
 
-            int i = 7;
+            i = 7;
             int j = 0;
             R = 19;
 
@@ -355,7 +395,6 @@ namespace Esercizio16
                     i--;
                     if (R < 4)
                     {
-                        V[j] = 1;
                         oldPos = newPos;
                         if (newPos == 35)
                         {
