@@ -128,7 +128,7 @@ namespace Esercizio16
                             Punteggio(Turno, pedG, pedR);
 
                             // Controllo Nuova Pedina - Forza 4
-                            ControlloVittoria(M, Turno, ref vG, ref vR, ref pareggio);
+                            ControlloVittoria(M, Turno, ref vG, ref vR, ref pareggio, j);
                             break;
 
                     }
@@ -176,110 +176,34 @@ namespace Esercizio16
                 v[i] = 0;
         }
 
-        static void ControlloVittoria(int[,] M, int T, ref bool vG, ref bool vR, ref bool pareggio)
+        static void ControlloVittoria(int[,] M, int T, ref bool vG, ref bool vR, ref bool pareggio, int j)
         {
+            int i = 0;
+            int cont = 0;
             int x = 0;
+
             if (T == 1)
                 x = 2;
-            else if (T == 2)
+            else
                 x = 1;
 
-            // Check horizontal lines
-            for (int i = 0; i < 8; i++)
+            // Controllo colonna
+            while (i < 8 && cont != 4)
             {
-                int count = 0;
-                for (int j = 0; j < 5; j++)
+                if (M[i,j] == x && M[i,j] != 0)
+                    cont++;
+                else
                 {
-                    if (M[i, j] == x)
-                    {
-                        count++;
-                        if (count == 4)
-                        {
-                            if (x == 1) 
-                                vR = true;
-                            else
-                                vG = true;
-                        }
-                    }
-                    else
-                    {
-                        count = 0;
-                    }
+                    cont = 1;
                 }
+                i++;
             }
 
-            // Check vertical lines
-            for (int i = 0; i < 5; i++)
-            {
-                int count = 0;
-                for (int j = 0; j < 8; j++)
-                {
-                    if (M[i, j] == x)
-                    {
-                        count++;
-                        if (count == 4)
-                        {
-                            if (x == 1)
-                                vR = true;
-                            else
-                                vG = true;
-                        }
-                    }
-                    else
-                    {
-                        count = 0;
-                    }
-                }
-            }
-
-            // Check diagonal lines (top-left to bottom-right)
-            for (int i = 0; i < 5; i++)
-            {
-                int count = 0;
-                for (int j = 0; j < 8 - i; j++)
-                {
-                    if (M[i + j, j] == x)
-                    {
-                        count++;
-                        if (count == 4)
-                        {
-                            if (x == 1)
-                                vR = true;
-                            else
-                                vG = true;
-                        }
-                    }
-                    else
-                    {
-                        count = 0;
-                    }
-                }
-            }
-
-            // Check diagonal lines (bottom-left to top-right)
-            for (int i = 0; i < 5; i++)
-            {
-                int count = 0;
-                for (int j = 0; j < 8 - i; j++)
-                {
-                    if (M[i + j, 7 - j] == x)
-                    {
-                        count++;
-                        if (count == 4)
-                        {
-                            if (x == 1)
-                                vR = true;
-                            else
-                                vG = true;
-                        }
-                    }
-                    else
-                    {
-                        count = 0;
-                    }
-                }
-            }
-
+            if (cont == 4)
+                if (x == 2)
+                    vG = true;
+                else
+                    vR = true;
         }
 
         static void StampaMatrice(int[,] M, int Rm, int Cm)
