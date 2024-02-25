@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Deployment.Internal;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
@@ -29,6 +30,7 @@ namespace Esercizio16
             int posMin = 7;
             int i = 0;
             int cont = 0;
+            int contP = 0;
 
             /*
              * Turno 1 ==> ROSSO
@@ -95,9 +97,6 @@ namespace Esercizio16
                                 Turno--;
                             }
 
-                            if (posI == posMax && (M[0, j] == 1 || M[0, j] == 2))
-                                pareggio = true;
-
                             // Controllo se la colonna è piena
                             while ((M[0, j] == 1 || M[0, j] == 2) && posI == posMax && !pareggio)
                             {
@@ -137,18 +136,27 @@ namespace Esercizio16
 
                     // Gestione della Pedina
                     Pedina(posI, ref posOLD, N, Turno, ref R, ref M, posMin, posMax, ref i);
+                    contP++;
 
                     // Controllo Nuova Pedina - Forza 4
                     ControlloColonna(M, Turno, ref vG, ref vR, j, i, ref cont);
-                    //ControlloDP(M, Turno, ref vG, ref vR, j, i);
-                    ControlloRiga(M, Turno, ref vG, ref vR, i);
+                    if (cont != 4)
+                        ControlloDP(M, Turno, ref vG, ref vR, j, i, ref cont);
+                    if (cont != 4) 
+                        ControlloRiga(M, Turno, ref vG, ref vR, i, ref cont);
+                    if(cont != 4)
+                        ControlloDS(M, Turno, ref vG, ref vR, j, i, ref cont);
 
                     if (cont == 4)
+                    {
                         if (Turno == 2)
                             vR = true;
                         else
                             vG = true;
-
+                    }
+                    else if (contP==64)
+                        pareggio = true;
+                    
                 }
 
             }
@@ -166,36 +174,45 @@ namespace Esercizio16
 
         } // FINE MAIN
 
-        static void controllo1(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
+        public static void ControlloDS(int[,] M, int T, ref bool vG, ref bool vR, int j, int i, ref int cont)
         {
-            int cont = 1;
-            int a = i;
-            int b = j;
+            cont = 0;
+            int x = 0;
 
+            if (T == 2)
+                x = 1;
+            else
+                x = 2;
 
-            i++;
-            j++;
-
-            while(i < 8 && j < 8 && cont != 4)
+            //Decremento i e j fino a che una valga zero
+            while (i > 0 && j < 7)
             {
-                if (M[i, j] == M[a,b])
-                    cont++;
-                if (cont == 4) 
-                    if(T== 1)
-                        vG = true;
-                    else
-                        vR = true;
-
-                i++;
                 j++;
+                i--;
+            }
+
+            //Ciclo fino a quando i o j vale 8 o cont sia uguale a 4 
+            while (i < 7 && j > 0 && cont < 4)
+            {
+                if (x == M[i, j])
+                    cont++;
+                else
+                {
+                    cont = 1;
+                }
+
+                //Aumento di 1 sia i che j per rimanere sulla stessa diagonale
+                i++;
+                j--;
+
                 Console.SetCursorPosition(0, 25);
                 Console.Write(cont);
             }
         }
 
-        public static void ControlloRiga(int[,] M, int T, ref bool vG, ref bool vR, int i)
+        public static void ControlloRiga(int[,] M, int T, ref bool vG, ref bool vR, int i, ref int cont)
         {
-            int cont = 0;
+            cont = 0;
             int j = 0;
             int x = M[i, j];
             vG = false;
@@ -214,9 +231,9 @@ namespace Esercizio16
             }
         }
 
-        public static void ControlloDP(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
+        public static void ControlloDP(int[,] M, int T, ref bool vG, ref bool vR, int j, int i, ref int cont)
         {
-            int cont = 0;
+            cont = 0;
             int x = 0;
 
             if (T == 2)
@@ -224,32 +241,27 @@ namespace Esercizio16
             else
                 x = 2;
 
-            //decremento i e j fino a quando uno dei due non è uguale a 0
-
+            //Decremento i e j fino a che una valga zero
             while (i > 0 && j > 0)
             {
                 j--;
                 i--;
             }
 
-            //ciclo fino a quando i o j vale 8 o non trovo 4 pedine uguali vicine
-            while (i < 8 && j < 8 && cont != 4 && !vG && !vR)
+            //Ciclo fino a quando i o j vale 8 o cont sia uguale a 4 
+            while (i < 8 && j < 8)
             {
                 if (x == M[i, j])
                     cont++;
                 else
                 {
-                    cont = 1;
-                    x = M[i, j];
+                    cont = 0;
                 }
 
-                //incremento sia i che j per rimanere sulla stessa diagonale
+                //Aumento di 1 sia i che j per rimanere sulla stessa diagonale
                 i++;
                 j++;
             }
-
-            Console.SetCursorPosition(0, 25);
-            Console.Write(cont);
         }
 
         static void ControlloColonna(int[,] M, int T, ref bool vG, ref bool vR, int j, int i, ref int cont)
