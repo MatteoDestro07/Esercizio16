@@ -28,6 +28,7 @@ namespace Esercizio16
             int posMax = 35;
             int posMin = 7;
             int i = 0;
+            int cont = 0;
 
             /*
              * Turno 1 ==> ROSSO
@@ -117,7 +118,7 @@ namespace Esercizio16
                                 j++;
                             }
 
-                            while((M[0, j] == 1 || M[0, j] == 2) && posI == posMin && !pareggio)
+                            while ((M[0, j] == 1 || M[0, j] == 2) && posI == posMin && !pareggio)
                             {
                                 posOLD = posI;
                                 Console.SetCursorPosition(posOLD, 1);
@@ -138,9 +139,16 @@ namespace Esercizio16
                     Pedina(posI, ref posOLD, N, Turno, ref R, ref M, posMin, posMax, ref i);
 
                     // Controllo Nuova Pedina - Forza 4
-                    ControlloColonna(M, Turno, ref vG, ref vR, j, i);
-                    ControlloDP(M, Turno, ref vG, ref vR, j, i);
+                    ControlloColonna(M, Turno, ref vG, ref vR, j, i, ref cont);
+                    //ControlloDP(M, Turno, ref vG, ref vR, j, i);
                     ControlloRiga(M, Turno, ref vG, ref vR, i);
+
+                    if (cont == 4)
+                        if (Turno == 2)
+                            vR = true;
+                        else
+                            vG = true;
+
                 }
 
             }
@@ -158,15 +166,44 @@ namespace Esercizio16
 
         } // FINE MAIN
 
+        static void controllo1(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
+        {
+            int cont = 1;
+            int a = i;
+            int b = j;
+
+
+            i++;
+            j++;
+
+            while(i < 8 && j < 8 && cont != 4)
+            {
+                if (M[i, j] == M[a,b])
+                    cont++;
+                if (cont == 4) 
+                    if(T== 1)
+                        vG = true;
+                    else
+                        vR = true;
+
+                i++;
+                j++;
+                Console.SetCursorPosition(0, 25);
+                Console.Write(cont);
+            }
+        }
+
         public static void ControlloRiga(int[,] M, int T, ref bool vG, ref bool vR, int i)
         {
             int cont = 0;
             int j = 0;
             int x = M[i, j];
+            vG = false;
+            vR = false;
 
             while (j < 8 && cont < 4) 
             {
-                if (M[i, j] == x && x != 0)
+                if (M[i, j] == x && M[i,j] != 0)
                     cont++;
                 else
                 {
@@ -175,19 +212,20 @@ namespace Esercizio16
                 }
                 j++;
             }
-            if (cont == 4)
-                if (x == 2)
-                    vG = true;
-                else
-                    vR = true;
         }
 
-        public static void ControlloDP(int[,] M, int T, ref bool vG, ref bool vR, int j, int i) 
+        public static void ControlloDP(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
         {
-            int x = 0;
             int cont = 0;
+            int x = 0;
+
+            if (T == 2)
+                x = 1;
+            else
+                x = 2;
 
             //decremento i e j fino a quando uno dei due non è uguale a 0
+
             while (i > 0 && j > 0)
             {
                 j--;
@@ -195,13 +233,14 @@ namespace Esercizio16
             }
 
             //ciclo fino a quando i o j vale 8 o non trovo 4 pedine uguali vicine
-            while (i < 8 && j < 8 && cont != 4)
+            while (i < 8 && j < 8 && cont != 4 && !vG && !vR)
             {
-                if (M[i,j] == x && M[i,j] != 0)
+                if (x == M[i, j])
                     cont++;
                 else
                 {
                     cont = 1;
+                    x = M[i, j];
                 }
 
                 //incremento sia i che j per rimanere sulla stessa diagonale
@@ -209,41 +248,29 @@ namespace Esercizio16
                 j++;
             }
 
-            if (cont == 4)
-                if (x == 2)
-                    vG = true;
-                else
-                    vR = true;
+            Console.SetCursorPosition(0, 25);
+            Console.Write(cont);
         }
 
-        static void ControlloColonna(int[,] M, int T, ref bool vG, ref bool vR, int j, int i)
+        static void ControlloColonna(int[,] M, int T, ref bool vG, ref bool vR, int j, int i, ref int cont)
         {
-            int cont = 0;
-            int x = 0;
+            cont = 0;
             i = 0;
+            int x = M[i, j];
+            vG = false;
+            vR = false;
 
-            if (T == 1)
-                x = 2;
-            else
-                x = 1;
-
-            // Controllo colonna
-            while (i < 8 && cont != 4)
+            while (i < 8 && cont < 4)
             {
-                if (M[i,j] == x && M[i,j] != 0)
+                if (M[i, j] == x && M[i, j] != 0)
                     cont++;
                 else
                 {
                     cont = 1;
+                    x = M[i, j];
                 }
                 i++;
             }
-
-            if (cont == 4)
-                if (x == 2)
-                    vG = true;
-                else
-                    vR = true;
         }
 
         static void StampaMatrice(int[,] M, int Rm, int Cm)
