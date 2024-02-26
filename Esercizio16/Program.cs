@@ -196,7 +196,11 @@ namespace Esercizio16
                         if (contVG > 0 || contVR > 0 || contPareggio > 0)
                             visualizzaRisultati(contVG, contVR, contPareggio);
                         else
+                        {
                             Console.WriteLine("Gioca almeno una partita per vedere i risultati");
+                            attesa();
+                        }
+
                         break;
                 }
             }
@@ -211,7 +215,7 @@ namespace Esercizio16
             Console.WriteLine("----RISULTATI----");
             Console.WriteLine($"Vittorie Rosso: {VR}");
             Console.WriteLine($"Vittorie Giallo: {VG}");
-            Console.WriteLine($"Pareggi :{Par}");
+            Console.WriteLine($"Pareggi: {Par}");
 
             attesa();
         }
@@ -229,6 +233,7 @@ namespace Esercizio16
             Console.WriteLine();
             Console.WriteLine("Inserisci la tua scelta == >");
             sc = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine();
 
             return sc;
         }
